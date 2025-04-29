@@ -1,0 +1,11 @@
+services: 
+  external_ai_test:
+    image: externalaitest:latest
+    ports:
+      - "8888:8888"
+    volumes:
+      - /Users/utkarsh/Documents/External_AI_Test/app/datastore/:/app/datastore/
+      - /Users/utkarsh/Documents/External_AI_Test/app/outputs/:/app/outputs/
+    command: streamlit run streamlit.py --server.port=8888 --server.address=0.0.0.0
+    network_mode: bridge
+    restart: unless-stopped
