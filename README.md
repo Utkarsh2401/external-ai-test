@@ -167,9 +167,9 @@ Each memory record includes:
 │   │   ├── 20250429_154415_Make_a_motorbike_rac.png
 │   │   ├── 20250429_160810_Make_the_motorbike_r.glb
 │   │   └── 20250429_160810_Make_the_motorbike_r.png
-|
+
 ├── assets/
-|
+
 ├── onto/                            
 ```
 
