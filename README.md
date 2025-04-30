@@ -66,8 +66,6 @@ https://github.com/user-attachments/assets/58774b2e-2b0b-4981-9de5-7454673509bb
 
 ![image](./assets/20250430_162252_Make_me_a_glowing_dr.png)
 
-**Memory**: The app stores the user's prompt and the generated assets in a database for future use.
-
 ## 🧠 Memory System
 
 This application includes a built-in **long-term memory mechanism** powered by an embedded **SQLite database**. The memory system is designed to persist and retrieve previously generated scenes based on user prompts.
@@ -104,7 +102,7 @@ Each memory record includes:
 
 ### Example
 
-> User promot: “Make a motorbike racing through a track”
+> User prompt: “Make a motorbike racing through a track”
 
 - Output Image:
 
@@ -154,7 +152,7 @@ Each memory record includes:
 │   │   ├── memory.db                # SQLite database for memory
 │   │   └── tokens.json              # Stores LLM interaction tokens
 
-│   ├── models/                      # (Reserved) directory for future  models
+│   ├── models/                      # (Reserved) directory for future models
 
 │   ├── ontology_dc8f06af066e4a7880a5938933236037/  
 │   │   ├── __init__.py
@@ -174,3 +172,5 @@ Each memory record includes:
 |
 ├── onto/                            
 ```
+
+***Powered by Openfabric AI Services***
