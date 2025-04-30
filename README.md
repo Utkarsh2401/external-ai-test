@@ -48,6 +48,8 @@ You're not building an app. You're building **a creative partner**.
 
 ## How it works
 
+https://github.com/user-attachments/assets/58774b2e-2b0b-4981-9de5-7454673509bb
+
 **User Input**: The user enters a text prompt describing the scene they want to generate.
 
 > “Make me a glowing dragon standing on a cliff at sunset.”
