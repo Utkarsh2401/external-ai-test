@@ -16,6 +16,7 @@ from core.stub import Stub
 
 configurations: Dict[str, ConfigClass] = dict()
 
+# setting global variables
 TEXT_TO_IMAGE_APP_ID = "c25dcd829d134ea98f5ae4dd311d13bc.node3.openfabric.network"
 IMAGE_TO_3D_APP_ID = "f0b5f319156c4819b9827000b17e511a.node3.openfabric.network"   
 DB_PATH = "/app/datastore/memory.db"
@@ -27,7 +28,10 @@ pipe = None
 os.makedirs(OUTPUT_DIR, exist_ok=True)
 
 def init_db():
-    """Initialize the SQLite database for long-term memory storage."""
+    """
+    Initialize the SQLite database for long-term memory storage.
+    """
+
     os.makedirs(os.path.dirname(DB_PATH), exist_ok=True)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
@@ -71,6 +75,7 @@ def save_to_memory(original_prompt: str, expanded_prompt: str, image_path: str, 
     Returns:
         str: The ID of the created record
     """
+
     creation_id = str(uuid.uuid4())
     timestamp = datetime.now().isoformat()
     
@@ -82,6 +87,7 @@ def save_to_memory(original_prompt: str, expanded_prompt: str, image_path: str, 
         (creation_id, timestamp, original_prompt, expanded_prompt, image_path, model_path)
     )
     
+    # Only including words longer than 3 characters to avoid overly common tags
     tags = [word.lower() for word in original_prompt.split() if len(word) > 3]
     for tag in set(tags):
         cursor.execute("INSERT INTO tags VALUES (?, ?)", (creation_id, tag))
@@ -102,6 +108,8 @@ def find_similar_creations(prompt: str, limit: int = 3) -> List[Dict]:
     Returns:
         List[Dict]: List of similar creations with their details
     """
+
+    # Preparing search terms based on significant words in the prompt
     search_terms = [word.lower() for word in prompt.split() if len(word) > 3]
     
     if not search_terms:
@@ -112,6 +120,8 @@ def find_similar_creations(prompt: str, limit: int = 3) -> List[Dict]:
     cursor = conn.cursor()
     
     placeholders = ','.join(['?'] * len(search_terms))
+
+    # Quering the database for creations that share tags with the current prompt, ordered by relevance
     query = f"""
     SELECT c.*, COUNT(t.tag) as match_count
     FROM creations c
@@ -131,6 +141,7 @@ def find_similar_creations(prompt: str, limit: int = 3) -> List[Dict]:
 ############################################################
 # Config callback function
 ############################################################
+
 def config(configuration: Dict[str, ConfigClass], state: State) -> None:
     """
     Stores user-specific configuration data.
@@ -139,6 +150,7 @@ def config(configuration: Dict[str, ConfigClass], state: State) -> None:
         configuration (Dict[str, ConfigClass]): A mapping of user IDs to configuration objects.
         state (State): The current state of the application (not used in this implementation).
     """
+
     for uid, conf in configuration.items():
         logging.info(f"Saving new config for user with id:'{uid}'")
         configurations[uid] = conf
@@ -146,6 +158,8 @@ def config(configuration: Dict[str, ConfigClass], state: State) -> None:
 ############################################################
 # Execution callback function
 # ############################################################
+
+# For swagger-ui execution
 def execute(model: AppModel) -> None:
     """
     Main execution entry point for handling a model pass.
@@ -175,6 +189,7 @@ def execute(model: AppModel) -> None:
 
     similar_creations = find_similar_creations(user_prompt)
 
+    # Building context from previous similar prompts to help the LLM generate more consistent expansions
     memory_context = ""
     if similar_creations:
         memory_context = "You have previously created the following scenes:\n"
@@ -193,7 +208,7 @@ def execute(model: AppModel) -> None:
 
         if llm is None:
             logging.info("Initializing LLM for prompt expansion...")
-            model_path = "./models/phi-2-Q4-K_M.gguf" 
+            model_path = "./models/phi-2-Q4-K_M.gguf" # loading model
             try:
                 llm = Llama(model_path, n_ctx=2048)
                 logging.info("Model loaded successfully.")
@@ -204,9 +219,11 @@ def execute(model: AppModel) -> None:
             pipe = llm
 
         expansion_input = user_prompt
+        # Appending memory-based context to the user prompt if relevant
         if memory_context:
             expansion_input = f"{memory_context}\nNew request: {user_prompt}"
 
+        # Creating a system prompt to instructing the model
         system_prompt = (
             "You are a visual scene designer AI."
             "Expand the following prompt with rich, detailed visual descriptions for image generation."
@@ -234,6 +251,8 @@ def execute(model: AppModel) -> None:
         image_data = image_result.get('result')
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Create a safe filename fragment from the user's prompt
         safe_prompt = "".join([c if c.isalnum() else "_" for c in user_prompt[:20]])
         image_filename = f"{timestamp}_{safe_prompt}.png"
         image_path = os.path.join(OUTPUT_DIR, image_filename)
@@ -250,6 +269,7 @@ def execute(model: AppModel) -> None:
 
         logging.info("Calling Image-to-3D app...")
 
+        # Converting binary image to base64 to send to Image-to-3D
         image_base64 = base64.b64encode(image_data).decode('utf-8')
         payload = {'input_image': image_base64}
 
@@ -292,6 +312,7 @@ def execute(model: AppModel) -> None:
     except Exception as e:
         logging.error(f"Error in execution: {str(e)}")
 
+# For streamlit-app execution
 def execute_streamlit(prompt):
     """
     Main execution entry point for handling a model pass.
@@ -318,6 +339,7 @@ def execute_streamlit(prompt):
     
     similar_creations = find_similar_creations(user_prompt)
     
+    # Building context from previous similar prompts to help the LLM generate more consistent expansions
     memory_context = ""
     if similar_creations:
         memory_context = "You have previously created the following scenes:\n"
@@ -345,9 +367,11 @@ def execute_streamlit(prompt):
             pipe = llm
 
         expansion_input = user_prompt
+        # Appending memory-based context to the user prompt if relevant
         if memory_context:
             expansion_input = f"{memory_context}\nNew request: {user_prompt}"
         
+        # Creating a system prompt to instructing the model
         system_prompt = (
             "You are a visual scene designer AI."
             "Expand the following prompt with rich, detailed visual descriptions for image generation."
@@ -383,6 +407,8 @@ def execute_streamlit(prompt):
             return None
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+
+        # Creating a safe filename fragment from the user's prompt
         safe_prompt = "".join([c if c.isalnum() else "_" for c in user_prompt[:20]])
         image_filename = f"{timestamp}_{safe_prompt}.png"
         image_path = os.path.join(OUTPUT_DIR, image_filename)
@@ -393,6 +419,7 @@ def execute_streamlit(prompt):
         
         logging.info("Calling Image-to-3D app...")
         try:
+            # Converting binary image to base64 to send to Image-to-3D
             image_base64 = base64.b64encode(image_data).decode('utf-8')
             payload = {'input_image': image_base64}
             

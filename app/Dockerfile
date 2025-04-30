@@ -22,5 +22,8 @@ COPY . .
 EXPOSE 8888
 
 # Start the Flask app using the start.sh script
+# Uncomment the below line to use swagger-ui
 # CMD ["sh","start.sh"]
+
+# For streamlit-app
 CMD ["streamlit", "run", "streamlit.py"]

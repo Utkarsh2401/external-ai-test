@@ -8,6 +8,7 @@ from main import execute_streamlit, init_db, configurations, ConfigClass
 
 logging.basicConfig(level=logging.INFO)
 
+# Output directory for generated files
 OUTPUT_DIR = "/app/outputs"
 if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR, exist_ok=True)
@@ -24,6 +25,7 @@ st.set_page_config(
 st.title("🎨 Visual Scene Design AI")
 st.write("Transform your text descriptions into stunning visual scenes and 3D models using AI.")
 
+# Seting default app IDs for the session
 default_app_ids = [
     "c25dcd829d134ea98f5ae4dd311d13bc.node3.openfabric.network",
     "f0b5f319156c4819b9827000b17e511a.node3.openfabric.network"
@@ -47,6 +49,7 @@ generate_button = st.button("🚀 Generate Scene")
 if generate_button and user_prompt:
     progress_placeholder = st.empty()
 
+    # Creating an animated "thinking" effect
     thinking_texts = [
         "Analyzing your imagination.",
         "Expanding the vision..",

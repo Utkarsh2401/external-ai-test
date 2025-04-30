@@ -3,9 +3,15 @@ services:
     image: externalaitest:latest
     ports:
       - "8888:8888"
+
+    # Mount local directories into the container for persistent storage
     volumes:
-      - /Users/utkarsh/Documents/External_AI_Test/app/datastore/:/app/datastore/
-      - /Users/utkarsh/Documents/External_AI_Test/app/outputs/:/app/outputs/
+    # Add the full path to 'datastore' and 'outputs' directories for mapping
+      - <your-full-path>/app/datastore/:/app/datastore/
+      - <your-full-path>/app/outputs/:/app/outputs/
+
+    # Comment below line when running swagger-ui
     command: streamlit run streamlit.py --server.port=8888 --server.address=0.0.0.0
+
     network_mode: bridge
     restart: unless-stopped
